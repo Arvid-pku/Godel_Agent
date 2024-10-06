@@ -1,3 +1,8 @@
+<div align="center">
+<img src='./figures/logo.png'  width=300px>
+</div>
+
+
 # Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement
 
 
