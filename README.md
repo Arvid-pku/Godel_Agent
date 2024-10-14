@@ -4,7 +4,17 @@
 
 
 # Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement
+<div align="center">
+<p align="center">
+<a href="https://arxiv.org/abs/2410.04444">[Paper]</a>
+<a href="#method-overview">[Overview]</a>
+<a href="#installation">[Installation]</a>
+<a href="#project-structure">[Structure]</a>
+<a href="#citation">[Citation]</a>
+</p>
+---
 
+</div>
 
 ## Method Overview
 ![Comparison of three agent paradigms.](./figures/compare.png)
@@ -50,3 +60,19 @@
 ## Configuration
 
 Make sure to configure your OpenAI API key in the `key.env` file before running the code.
+
+
+## Citation
+
+If you find our repository useful in your research, please kindly consider cite:
+```bibtex
+@misc{yin2024godelagentselfreferentialagent,
+      title={G\"odel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement}, 
+      author={Xunjian Yin and Xinyi Wang and Liangming Pan and Xiaojun Wan and William Yang Wang},
+      year={2024},
+      eprint={2410.04444},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2410.04444}, 
+}
+```
