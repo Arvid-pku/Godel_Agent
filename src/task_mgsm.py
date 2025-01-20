@@ -51,7 +51,7 @@ LANG_TO_INSTRUCTIONS = {
 {input}"""
 }
 
-LANG_TO_FPATH = lambda lang: f"../dataset/mgsm/mgsm_{lang}.tsv"
+LANG_TO_FPATH = lambda lang: f"../datasets/mgsm/mgsm_{lang}.tsv"
 
 ALL_LANGUAGES = ["bn", "de", "en", "es", "fr", "ja", "ru", "sw", "te", "th", "zh"]
 

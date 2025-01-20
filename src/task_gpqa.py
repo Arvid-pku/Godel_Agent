@@ -37,7 +37,7 @@ def solver(agent, task: str):
 def real_evaluate(solver):
     # dynamically define forward()
     # modified from https://github.com/luchris429/DiscoPOP/blob/main/scripts/launch_evo.py
-    data_filename = '../dataset/gpqa_diamond.csv'
+    data_filename = '../datasets/gpqa_diamond.csv'
     INDEX_TO_LETTER = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
     # set seed 0 for valid set
     questions = load_questions(data_filename, seed=0)
@@ -80,7 +80,7 @@ class GPQA_Task:
     def evaluate(self, solver):
         # dynamically define forward()
         # modified from https://github.com/luchris429/DiscoPOP/blob/main/scripts/launch_evo.py
-        data_filename = '../dataset/gpqa_diamond.csv'
+        data_filename = '../datasets/gpqa_diamond.csv'
         INDEX_TO_LETTER = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
         # set seed 0 for valid set
         questions = load_questions(data_filename, seed=0)

@@ -64,7 +64,7 @@ def action_environment_aware(agent: AgentBase):
     summary.extend(summarize_items(functions, "\nGlobal Functions:"))
     summary.extend(summarize_items(modules, "\nGlobal Modules:"))
     summary.extend(summarize_items(variables, "\nGlobal Variables:"))
-    summary.extend(summarize_items(calsses, "\nGlobal Calsses:"))
+    summary.extend(summarize_items(calsses, "\nGlobal Classes:"))
     
     methods = inspect.getmembers(agent, inspect.ismethod)
     attributes = inspect.getmembers(agent, lambda x: not inspect.ismethod(x))
@@ -149,18 +149,17 @@ def action_adjust_logic(module_name: str, target_name: str, new_code=str, target
         locals_dict = {}
         exec(compile(new_code, f"running.{module_name}.{target_name}", "exec"), globals(), locals_dict)
         if '.' in target_name:
-            class_name, target_name = target_name.split('.')
-            if class_name in locals_dict:
-                new_target = getattr(locals_dict[class_name], target_name)
-                locals_dict.pop(class_name)
+            class_name_, target_name_ = target_name.split('.')
+            if class_name_ in locals_dict:
+                new_target = getattr(locals_dict[class_name_], target_name_)
+                locals_dict.pop(class_name_)
             else:
-                new_target = locals_dict[target_name]
-                locals_dict.pop(target_name)
+                new_target = locals_dict[target_name_]
+                locals_dict.pop(target_name_)
         else:
             new_target = locals_dict[target_name]
             locals_dict.pop(target_name)
         globals().update(locals_dict)
-        
         # Apply the new definition or value to the target
         if '.' in target_name:  # Class attribute
             class_name, target_name = target_name.split('.')
@@ -172,7 +171,7 @@ def action_adjust_logic(module_name: str, target_name: str, new_code=str, target
                 cls.__source__ = {}
                 for name, method in inspect.getmembers(cls, predicate=inspect.isfunction):
                     cls.__source__[name] = logic.get_source_code(method, name)
-            cls.__source__[target_name] = '\n'.join(['    '+code_line for code_line in new_code.split('\n')])
+            cls.__source__[target_name] = '\n'.join(['    ' + code_line for code_line in new_code.split('\n')])
 
         else:  # Module level attribute
             setattr(module, target_name, new_target)

@@ -49,7 +49,7 @@ def solver(agent, task: str):
 def real_evaluate(solver):
     LETTER_TO_INDEX = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
     # set seed 0 for valid set
-    data_filename = "../dataset/mmlu.csv"
+    data_filename = "../datasets/mmlu.csv"
     df = pandas.read_csv(data_filename)
     random.seed(0)
     examples = [row.to_dict() for _, row in df.iterrows()]
@@ -90,7 +90,7 @@ class MMLU_Task:
     def evaluate(self, solver):
         # LETTER_TO_INDEX = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
         # set seed 0 for valid set
-        data_filename = "../dataset/mmlu.csv"
+        data_filename = "../datasets/mmlu.csv"
         df = pandas.read_csv(data_filename)
         random.seed(0)
         examples = [row.to_dict() for _, row in df.iterrows()]
