@@ -61,6 +61,19 @@
 
 Make sure to configure your OpenAI API key in the `key.env` file before running the code.
 
+## Development Tips
+
+1. When you want to add a new action, you need to:   
+   a. Add an entry to the `agent.action_functions` list, including the name, parameters, return value, and functional description of the action you are adding, to facilitate LLM invocation.    
+   b. Implement the action function.    
+   c. (Optional) Emphasize it in the `goal_prompt` to encourage the agent to call this action under certain conditions.   
+
+2. When you want to use the Godel Agent in a new environment, you need to:  
+   a. Define some reward functions, where the input is the agent's policy and the output is feedback to the agent, such as scores, suggestions, or scenario descriptions.  
+   b. Implement the `action_evaluate_on_task` function for that environment.  
+   c. Implement the initial policy, which can be simple. The current implementation is the `solver` function (you can reflect the environment in which the policy is applied within the `solver` or describe the environment in the `goal_prompt`).  
+
+3. If you want the Godel Agent to perform multiple tasks in a complex environment, you need to implement different initial solvers and different action_evaluate_on_task functions. Note that action_evaluate_on_task is also an action and needs to be added as described in the first point.  
 
 ## Citation
 
