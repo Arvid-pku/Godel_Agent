@@ -74,18 +74,3 @@ Make sure to configure your OpenAI API key in the `key.env` file before running 
    c. Implement the initial policy, which can be simple. The current implementation is the `solver` function (you can reflect the environment in which the policy is applied within the `solver` or describe the environment in the `goal_prompt`).  
 
 3. If you want the Godel Agent to perform multiple tasks in a complex environment, you need to implement different initial solvers and different action_evaluate_on_task functions. Note that action_evaluate_on_task is also an action and needs to be added as described in the first point.  
-
-## Citation
-
-If you find our repository useful in your research, please kindly consider cite:
-```bibtex
-@misc{yin2024godelagentselfreferentialagent,
-      title={G\"odel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement}, 
-      author={Xunjian Yin and Xinyi Wang and Liangming Pan and Xiaojun Wan and William Yang Wang},
-      year={2024},
-      eprint={2410.04444},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2410.04444}, 
-}
-```
