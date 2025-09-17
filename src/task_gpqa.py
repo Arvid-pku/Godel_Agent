@@ -18,7 +18,7 @@ last_test_acc = 0.
 def solver(agent, task: str):
     messages = [{"role": "user", "content": f"# Your Task:\n{task}"}]
     response = agent.action_call_json_format_llm(
-        model="gpt-3.5-turbo", 
+        model="gpt-4.1-mini", 
         messages=messages, 
         temperature=0.8, 
         num_of_response=1,
@@ -37,7 +37,7 @@ def solver(agent, task: str):
 def real_evaluate(solver):
     # dynamically define forward()
     # modified from https://github.com/luchris429/DiscoPOP/blob/main/scripts/launch_evo.py
-    data_filename = '../datasets/gpqa_diamond.csv'
+    data_filename = 'datasets/gpqa_diamond.csv'
     INDEX_TO_LETTER = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
     # set seed 0 for valid set
     questions = load_questions(data_filename, seed=0)
@@ -73,14 +73,14 @@ def real_evaluate(solver):
     acc = sum(acc_list) / len(acc_list)
     interval = bootstrap_confidence_interval(acc_list)
     if acc > last_test_acc:
-        open(f"result/gpqa_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
+        open(f"results/gpqa_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
     return acc
 
 class GPQA_Task:
     def evaluate(self, solver):
         # dynamically define forward()
         # modified from https://github.com/luchris429/DiscoPOP/blob/main/scripts/launch_evo.py
-        data_filename = '../datasets/gpqa_diamond.csv'
+        data_filename = 'datasets/gpqa_diamond.csv'
         INDEX_TO_LETTER = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
         # set seed 0 for valid set
         questions = load_questions(data_filename, seed=0)

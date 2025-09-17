@@ -11,10 +11,10 @@ import numpy as np
 from wrap import wrap_solver
 
 Example = namedtuple('Example', ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_index'])
-threshold = 0.5
+threshold = 0.94
 last_test_acc = 0.
 
-client = OpenAI()
+client = OpenAI(api_key=open("src/key.env", "r").read().strip())
 LANG_TO_INSTRUCTIONS = {
     "en": """Solve this math problem.
 
@@ -51,14 +51,14 @@ LANG_TO_INSTRUCTIONS = {
 {input}"""
 }
 
-LANG_TO_FPATH = lambda lang: f"../datasets/mgsm/mgsm_{lang}.tsv"
+LANG_TO_FPATH = lambda lang: f"datasets/mgsm/mgsm_{lang}.tsv"
 
 ALL_LANGUAGES = ["bn", "de", "en", "es", "fr", "ja", "ru", "sw", "te", "th", "zh"]
 
 def solver(agent, task: str):
     messages = [{"role": "user", "content": f"# Your Task:\n{task}"}]
     response = agent.action_call_json_format_llm(
-        model="gpt-3.5-turbo", 
+        model="gpt-4.1-mini", 
         messages=messages, 
         temperature=0.8, 
         num_of_response=1,
@@ -106,7 +106,7 @@ def real_evaluate(solver):
     acc = sum(acc_list) / len(acc_list)
     interval = bootstrap_confidence_interval(acc_list)
     if acc > last_test_acc:
-        open(f"result/mgsm_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
+        open(f"results/mgsm_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
     return acc
 
 class MGSM_Task:
@@ -117,7 +117,7 @@ class MGSM_Task:
         examples = examples[:128]
         random.seed(time.time())
         random.shuffle(examples)
-        examples = examples[:20]
+        examples = examples[:50]
         questions = [example['inputs'] for example in examples]
         answers = [example['targets'] for example in examples]
         max_workers = min(len(examples), 48)
@@ -146,10 +146,10 @@ class MGSM_Task:
         print("Acc:", valid_acc)
         if valid_acc >= threshold:
             test_acc = real_evaluate(solver)
-            feedback = f"Valid Accuracy: {valid_acc}\nTest Accuracy {test_acc}\n" + "Evaluation Info:\n" + "\n".join(info_list)
+            feedback = f"Valid Accuracy: {valid_acc}\nTest Accuracy {test_acc}\n"# + "Evaluation Info:\n" + "\n".join(info_list)
         else:
             test_acc = 0
-            feedback = f"`Valid Accuracy: `{valid_acc}\nValid Accuracy less than {threshold}, no testing needed.\n" + "Evaluation Info:\n" + "\n".join(info_list)
+            feedback = f"`Valid Accuracy: `{valid_acc}\nValid Accuracy less than {threshold}, no testing needed.\n" #+ "Evaluation Info:\n" + "\n".join(info_list)
         return feedback, test_acc
 
 
@@ -163,7 +163,7 @@ def score_mgsm(target: str, prediction: str) -> bool:
     return target == prediction
 
 
-def get_lang_examples(lang: str) -> list[dict[str, str]]:
+def get_lang_examples(lang: str): #-> list[dict[str, str]]:
     fpath = LANG_TO_FPATH(lang)
     examples = []
     with open(fpath, mode='r', encoding='utf-8') as f:
@@ -176,7 +176,7 @@ def get_lang_examples(lang: str) -> list[dict[str, str]]:
     return examples
 
 
-def get_all_examples() -> list[dict[str, str]]:
+def get_all_examples(): #-> list[dict[str, str]]:
     examples = []
     for lang in ALL_LANGUAGES:
         # if lang != "en":

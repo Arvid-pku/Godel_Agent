@@ -37,8 +37,7 @@
 
 3. Navigate to the source directory and run the main script:
    ```bash
-   cd src
-   python main.py
+   python src/main.py
    # You can adjust the task in the agent_module.py file.
    ```
 

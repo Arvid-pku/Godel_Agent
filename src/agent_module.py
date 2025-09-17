@@ -27,7 +27,7 @@ class AgentBase:
         raise NotImplementedError("action_call_llm hasn't been implemented")
 
 def action_display_analysis(analysis):
-    print(analysis, "\n\n")
+    print(f"========== Analysis:  ==========\n{analysis}", "\n\n")
     return "Analysis Received. Just do it!"
 
 def action_environment_aware(agent: AgentBase):
@@ -127,8 +127,6 @@ def action_adjust_logic(module_name: str, target_name: str, new_code=str, target
     """
     if module_name == "agent_module":
         if target_name == "solver":
-            if "gpt-4o" in new_code:
-                raise ValueError("ONLY model **gpt-3.5-turbo** can be used in solver.")
             if "time.sleep" in new_code:
                 raise ValueError("Don't use `time.sleep` in solver.")
         if target_name == "Agent.action_call_llm":
@@ -142,7 +140,7 @@ def action_adjust_logic(module_name: str, target_name: str, new_code=str, target
     # Import the module dynamically
     module = importlib.import_module(module_name)
     _target_name = target_name
-    print(new_code, end='\n\n')
+    print(f"========== New Code:  ==========\n{new_code}", end='\n\n')
     # Perform the operation based on type (modify, add, delete)
     if operation in ['modify', 'add']:
         # Compile the new code within the current global and a new local dict
@@ -277,11 +275,11 @@ def action_run_code(code_type: str, code: str, timeout: float = 30.0) -> str:
     
     return result_str or "No output, errors, or return value."
 
-import Gödel_Agent.src.task_mgsm as task_mgsm
+import task_mgsm as task_mgsm
 def solver(agent, task: str):
     messages = [{"role": "user", "content": f"# Your Task:\n{task}"}]
     response = agent.action_call_json_format_llm(
-        model="gpt-3.5-turbo", 
+        model="gpt-4o-mini-2024-07-18", 
         messages=messages, 
         temperature=0.8, 
         num_of_response=1,
@@ -312,7 +310,7 @@ def action_evaluate_on_task(task, solver):
     return feedback
 
 class Agent(AgentBase):
-    def __init__(agent, api_key=None, goal_prompt_path='goal_prompt.md', key_path='key.env'):
+    def __init__(agent, api_key=None, goal_prompt_path='src/goal_prompt.md', key_path='src/key.env'):
         # Load configurations
         agent.goal_prompt = open(goal_prompt_path, 'r').read()
         agent.goal_task = task_mgsm.MGSM_Task()
@@ -450,7 +448,7 @@ class Agent(AgentBase):
                         "type": "object",
                         "properties": {
                             "model": {
-                                "enum": ["gpt-4o-mini", "gpt-4o"],
+                                "enum": ["gpt-4o-mini", "gpt-4o", "gpt-5", "o3-2025-04-16"],
                                 "description": "ID of the model to use."
                             },
                             "messages": {
@@ -517,8 +515,8 @@ class Agent(AgentBase):
         first_aware_content = action_environment_aware(agent)
         solver_logic = action_read_logic("agent_module", "solver")
         
-        print(first_aware_content, end="\n\n")
-        print(solver_logic, end="\n\n")
+        print(f"========== First Aware Content:  ==========\n{first_aware_content}", end="\n\n")
+        print(f"========== Solver Logic:  ==========\n{solver_logic}", end="\n\n")
 
         # agent.optimize_history.append({"role": "user", "content": first_aware_content})
         agent.optimize_history.append({"role": "user", "content": "The logic of solver:\n" + solver_logic})
@@ -529,42 +527,42 @@ class Agent(AgentBase):
         """
         
         is_reinit = False
-        for tool_call in actions['tool_calls']:
-            print("tool call:", tool_call, end="\n\n")
+        for tool_call in actions.tool_calls:
+            print(f"========== Tool Call:  ==========\n{tool_call}", end="\n\n")
             try:
-                action_counter[tool_call['function']['name']] += 1
-                arguments = json.loads(tool_call['function']['arguments']) if tool_call['function']['arguments'] else {}
-                if tool_call['function']['name'] == "action_display_analysis":
+                action_counter[tool_call.function.name] += 1
+                arguments = json.loads(tool_call.function.arguments) if tool_call.function.arguments else {}
+                if tool_call.function.name == "action_display_analysis":
                     result = action_display_analysis(**arguments)
 
-                elif tool_call['function']['name'] == "action_environment_aware":
+                elif tool_call.function.name == "action_environment_aware":
                     result = action_environment_aware(agent, **arguments)
 
-                elif tool_call['function']['name'] == "action_read_logic":
+                elif tool_call.function.name == "action_read_logic":
                     result = action_read_logic(**arguments)
 
-                elif tool_call['function']['name'] == "action_adjust_logic":
+                elif tool_call.function.name == "action_adjust_logic":
                     result = action_adjust_logic(**arguments)
 
-                elif tool_call['function']['name'] == "action_run_code":
+                elif tool_call.function.name == "action_run_code":
                     result = action_run_code(**arguments)
                     if arguments.get("code_type", None) == "python" and "self_evolving_agent.reinit()" in arguments.get("code", ""):
                         is_reinit = True
-                elif tool_call['function']['name'] == "action_call_llm":
+                elif tool_call.function.name == "action_call_llm":
                     result = agent.action_call_llm(**arguments)
-                    print(result[0])
+                    print(f"========== Action Call LLM Result:  ==========\n{result[0]}", end="\n\n")
 
-                elif tool_call['function']['name'] == 'action_call_json_format_llm':
+                elif tool_call.function.name == 'action_call_json_format_llm':
                     result = agent.action_call_json_format_llm(**arguments)
                     try:
-                        print(json.loads(result[0]))
+                        print(f"========== Action Call JSON Format LLM Result:  ==========\n{json.loads(result[0])}", end="\n\n")
                     except:
-                        print(result[0])
+                        print(f"========== Action Call JSON Format LLM Result:  ==========\n{result[0]}", end="\n\n")
 
-                elif tool_call['function']['name'] == "action_evaluate_on_task":
+                elif tool_call.function.name == "action_evaluate_on_task":
                     result = action_evaluate_on_task(agent.goal_task, functools.partial(solver, agent))
                 else:
-                    raise ValueError(f"Unknown function name: {tool_call['function']['name']}")
+                    raise ValueError(f"Unknown function name: {tool_call.function.name}")
 
             except Exception as e:
                 action_counter["error_handle"] += 1
@@ -573,18 +571,18 @@ class Agent(AgentBase):
                 result = "Error " + exception_stringio.getvalue()
                 exception_stringio.close()
 
-            print("tool call result:\n", result, sep="", end="\n\n")
+            print(f"========== Tool Call Result:  ==========\n{result if len(result) < 100 else result[:100] + '...'}", sep="", end="\n\n")
             if is_reinit:
                 break
             agent.optimize_history.append({"role": "tool", 
                                            "content": result, 
-                                            "tool_call_id": tool_call['id']})
+                                            "tool_call_id": tool_call.id})
 
 
-        print("Action Counter:", action_counter, end='\n\n')
-        if action_counter["evolve"] >= 30:
+        print(f"========== Action Counter:  ==========\n{action_counter}", end='\n\n')
+        if action_counter["evolve"] >= 100:
             sys.exit(1)
-        print("Agent Evolve", end="\n\n")
+        print(f"========== Agent Evolve:  ==========", end="\n\n")
         
         agent.evolve()
 
@@ -598,12 +596,12 @@ class Agent(AgentBase):
         tool_call_ids = set()
         remain_optimize_history = []
         for message in agent.optimize_history[-10:]:
-            if message["role"] == "assistant" and message["tool_calls"]:
+            if not isinstance(message, dict) and message.role == "assistant" and message.tool_calls:
                 tool_call_ids = set()
-                for tool_call in message["tool_calls"]:
-                    tool_call_ids.add(tool_call["id"])
-            if message["role"] == "tool" and message["tool_call_id"] not in tool_call_ids:
-                print(f"pop item: {message}", end='\n\n')
+                for tool_call in message.tool_calls:
+                    tool_call_ids.add(tool_call.id)
+            if not isinstance(message, dict) and message.role == "tool" and message.tool_call_id not in tool_call_ids:
+                print(f"========== Pop Item:  ==========\n{message}", end='\n\n')
                 continue
             remain_optimize_history.append(message)
         agent.optimize_history = remain_optimize_history
@@ -612,11 +610,11 @@ class Agent(AgentBase):
                     {"role": "system", "name": "Environment", "content": action_environment_aware(agent)},
                     *agent.optimize_history]
         try:
-            response = agent.action_call_llm(messages=messages, model="gpt-4o", response_format="text", tools=agent.action_functions, tool_choice="required")
+            response = agent.action_call_llm(messages=messages, model="o3-2025-04-16", response_format="text", tools=agent.action_functions, tool_choice="required")
         except Exception as e:
             print(repr(e))
             for message in messages:
-                print(message)
+                print(f"========== Message:  ==========\n{message}", end="\n\n")
             sys.exit(1)
         
         agent.optimize_history.append(response[0])
@@ -626,9 +624,9 @@ class Agent(AgentBase):
         agent,
         *,
         messages: typing.List[typing.Dict[str, str]], 
-        model: typing.Literal["gpt-3.5-turbo", "gpt-4o-mini", "gpt-4o"] = "gpt-4o-mini", 
+        model: typing.Literal["gpt-3.5-turbo", "gpt-4o-mini", "gpt-4o", "gpt-5", "o3-2025-04-16"] = "o3-2025-04-16", 
         temperature: float = 1.0, 
-        max_completion_tokens: int = 4096, 
+        # max_completion_tokens: int = 4096, 
         num_of_response: int = 1,
         role: str = "task solver", 
         return_dict_keys: typing.List[str] = [], 
@@ -643,7 +641,7 @@ class Agent(AgentBase):
         return_dicts = agent.action_call_llm(model=model,
                                     messages=_messages, 
                                     temperature=temperature,
-                                    max_completion_tokens=max_completion_tokens,
+                                    # max_completion_tokens=max_completion_tokens,
                                     n=num_of_response,
                                     response_format="json")
         
@@ -656,10 +654,10 @@ class Agent(AgentBase):
     def action_call_llm(
         agent, 
         *,
-        model: typing.Literal["gpt-3.5-turbo", "gpt-4o-mini", "gpt-4o"] = "gpt-4o-mini", 
+        model: typing.Literal["gpt-3.5-turbo", "gpt-4o-mini", "gpt-4o", "gpt-5", "o3-2025-04-16"] = "o3-2025-04-16", 
         messages: typing.List[typing.Dict[str, str]], 
         temperature: float = 1.0, 
-        max_completion_tokens: int = 4096, 
+        # max_completion_tokens: int = 4096, 
         n: int = 1,
         response_format: typing.Literal["text", "json", "json_object"] = "text", 
         tools=None, 
@@ -687,7 +685,10 @@ class Agent(AgentBase):
             import copy
             messages = copy.deepcopy(messages)
             for message in messages:
-                message["content"] = str(message["content"])
+                if isinstance(message, dict):
+                    message["content"] = str(message["content"])
+                else:
+                    message.content = str(message.content)
             
             kwargs = {
                 "n": n,
@@ -695,15 +696,18 @@ class Agent(AgentBase):
                 "messages": messages,
                 "response_format": {"type": response_format if response_format == "json_object" else "text"}, 
                 "temperature": temperature,
-                "max_completion_tokens": max_completion_tokens
+                # "max_completion_tokens": max_completion_tokens
             }
 
             if tools is not None:
                 kwargs["tools"] = tools
                 kwargs["tool_choice"] = tool_choice
 
-            response = agent.client.chat.completions.create(**kwargs).to_dict() # to Python dictionary
+            response = agent.client.chat.completions.create(**kwargs)
+            # breakpoint()
             
+            # response = response.choices[0].message.content
+
             def try_parse_json(content):
                 try:
                     return json.loads(content)
@@ -711,9 +715,9 @@ class Agent(AgentBase):
                     return {"JSONDecodeError": content}
 
             if response_format == "text":
-                return [choice["message"] for choice in response["choices"]]
+                return [choice.message for choice in response.choices]
             else:
-                return [try_parse_json(choice["message"]["content"]) for choice in response["choices"]]
+                return [try_parse_json(choice.message.content) for choice in response.choices]
         except Exception as e:
             raise e
         

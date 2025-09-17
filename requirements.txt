@@ -1,5 +1,5 @@
 numpy
 tqdm
 pandas
-openai
+openai==1.2.0
 backoff

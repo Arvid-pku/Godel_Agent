@@ -30,7 +30,7 @@ Choices:
 def solver(agent, task: str):
     messages = [{"role": "user", "content": f"# Your Task:\n{task}"}]
     response = agent.action_call_json_format_llm(
-        model="gpt-3.5-turbo", 
+        model="gpt-4.1-mini", 
         messages=messages, 
         temperature=0.8, 
         num_of_response=1,
@@ -49,7 +49,7 @@ def solver(agent, task: str):
 def real_evaluate(solver):
     LETTER_TO_INDEX = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
     # set seed 0 for valid set
-    data_filename = "../datasets/mmlu.csv"
+    data_filename = "datasets/mmlu.csv"
     df = pandas.read_csv(data_filename)
     random.seed(0)
     examples = [row.to_dict() for _, row in df.iterrows()]
@@ -83,14 +83,14 @@ def real_evaluate(solver):
     acc = sum(acc_list) / len(acc_list)
     interval = bootstrap_confidence_interval(acc_list)
     if acc > last_test_acc:
-        open(f"result/mmlu_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
+        open(f"results/mmlu_{round(acc, 4)}.txt", "w").writelines([interval] + info_list)
     return acc
 
 class MMLU_Task:
     def evaluate(self, solver):
         # LETTER_TO_INDEX = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
         # set seed 0 for valid set
-        data_filename = "../datasets/mmlu.csv"
+        data_filename = "datasets/mmlu.csv"
         df = pandas.read_csv(data_filename)
         random.seed(0)
         examples = [row.to_dict() for _, row in df.iterrows()]
